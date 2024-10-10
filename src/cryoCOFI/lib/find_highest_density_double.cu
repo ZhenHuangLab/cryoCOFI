@@ -1,3 +1,22 @@
+#include <cuda_runtime.h>
+
+__device__ double atomicAdd_double(double* address, double val)
+{
+    unsigned long long int* address_as_ull = (unsigned long long int*)address;
+    unsigned long long int old = *address_as_ull, assumed;
+
+    do {
+        assumed = old;
+        old = atomicCAS(address_as_ull, assumed,
+                        __double_as_longlong(val +
+                               __longlong_as_double(assumed)));
+
+    // Note: uses integer comparison to avoid hang in case of NaN (since NaN != NaN)
+    } while (assumed != old);
+
+    return __longlong_as_double(old);
+}
+
 __global__ void computeMeanAndStdDev(double* d_img, int size, double* d_sum, double* d_sum_sq) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     extern __shared__ double shared_mem[];
@@ -25,12 +44,12 @@ __global__ void computeMeanAndStdDev(double* d_img, int size, double* d_sum, dou
     }
 
     if (threadIdx.x == 0) {
-        atomicAdd(d_sum, s_sum[0]);
-        atomicAdd(d_sum_sq, s_sum_sq[0]);
+        atomicAdd_double(d_sum, s_sum[0]);
+        atomicAdd_double(d_sum_sq, s_sum_sq[0]);
     }
 }
 
-__global__ void normalizeAndComputeHistogram(double* d_img, int* d_mask, int* d_inside_hist, int* d_outside_hist, int size, double mean, double std_dev) {
+__global__ void normalizeAndComputeHistogram(double* d_img, int* d_mask, int* d_inside_hist, int* d_outside_hist, int size, double mean, double std_dev, int* d_inside_flags, int n_inside_flags, int* d_outside_flags, int n_outside_flags) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx < size) {
         double val = d_img[idx];
@@ -39,28 +58,52 @@ __global__ void normalizeAndComputeHistogram(double* d_img, int* d_mask, int* d_
         if (std_dev != 0.0) {
             normalized_val = (val - mean) / std_dev;
         } else {
-            normalized_val = val - mean; // If std_dev is 0, just subtract mean
+            normalized_val = val - mean;
         }
         
-        // Scale to [0, 1] range
-        normalized_val = (normalized_val + 3) / 6; // Assuming most values fall within 3 standard deviations
-        normalized_val = fmin(1.0, fmax(0.0, normalized_val)); // Clamp to [0, 1]
+        normalized_val = (normalized_val + 3) / 6;
+        normalized_val = fmin(1.0, fmax(0.0, normalized_val));
         
-        int bin = (int)(normalized_val * 255 + 0.5); // Add 0.5 for proper rounding
+        int bin = (int)(normalized_val * 255 + 0.5);
         bin = min(255, max(0, bin));
         
-        if (d_mask[idx] == 1) {
+        int mask_value = d_mask[idx];
+        bool is_inside = false;
+        bool is_outside = false;
+
+        for (int i = 0; i < n_inside_flags; i++) {
+            if (mask_value == d_inside_flags[i]) {
+                is_inside = true;
+                break;
+            }
+        }
+
+        for (int i = 0; i < n_outside_flags; i++) {
+            if (mask_value == d_outside_flags[i]) {
+                is_outside = true;
+                break;
+            }
+        }
+
+        if (is_inside) {
             atomicAdd(&d_inside_hist[bin], 1);
-        } else if (d_mask[idx] == 0) {
+        }
+        if (is_outside) {
             atomicAdd(&d_outside_hist[bin], 1);
         }
     }
 }
 
 extern "C" {
-    double find_highest_density_cuda(double* h_img, int* h_mask, int size) {
+    double find_highest_density_cuda(double* h_img, int* h_mask, int size, int* h_inside_flags, int n_inside_flags, int* h_outside_flags, int n_outside_flags) {
         double *d_img;
         int *d_mask, *d_inside_hist, *d_outside_hist;
+
+        int *d_inside_flags, *d_outside_flags;
+        cudaMalloc(&d_inside_flags, n_inside_flags * sizeof(int));
+        cudaMalloc(&d_outside_flags, n_outside_flags * sizeof(int));
+        cudaMemcpy(d_inside_flags, h_inside_flags, n_inside_flags * sizeof(int), cudaMemcpyHostToDevice);
+        cudaMemcpy(d_outside_flags, h_outside_flags, n_outside_flags * sizeof(int), cudaMemcpyHostToDevice);
         
         cudaMalloc(&d_img, size * sizeof(double));
         cudaMalloc(&d_mask, size * sizeof(int));
@@ -94,7 +137,7 @@ extern "C" {
         double std_dev = sqrt(variance);
 
         // Normalize and compute histogram
-        normalizeAndComputeHistogram<<<numBlocks, blockSize>>>(d_img, d_mask, d_inside_hist, d_outside_hist, size, mean, std_dev);
+        normalizeAndComputeHistogram<<<numBlocks, blockSize>>>(d_img, d_mask, d_inside_hist, d_outside_hist, size, mean, std_dev, d_inside_flags, n_inside_flags, d_outside_flags, n_outside_flags);
         
         int h_inside_hist[256], h_outside_hist[256];
         cudaMemcpy(h_inside_hist, d_inside_hist, 256 * sizeof(int), cudaMemcpyDeviceToHost);
@@ -117,6 +160,9 @@ extern "C" {
         cudaFree(d_mask);
         cudaFree(d_inside_hist);
         cudaFree(d_outside_hist);
+
+        cudaFree(d_inside_flags);
+        cudaFree(d_outside_flags);
         
         return diff;
     }

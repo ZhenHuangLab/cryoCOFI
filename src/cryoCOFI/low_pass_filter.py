@@ -12,6 +12,15 @@ def normalize(image):
     return (image - cp.min(image)) / (cp.max(image) - cp.min(image))
 
 def low_pass_filter_gaussian(image, cutoff_angstrom, pixel_size):
+    '''
+    low pass filter for the image using Gaussian filter.
+    Args:
+        image: image
+        cutoff_angstrom: cutoff angstrom
+        pixel_size: pixel size (angstrom)
+    Returns:
+        ift: low pass filtered image
+    '''
     rows, cols = image.shape
     freq_x = cp.linspace(-0.5, 0.5, cols)
     freq_y = cp.linspace(-0.5, 0.5, rows)

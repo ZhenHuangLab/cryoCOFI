@@ -3,7 +3,16 @@ import ctypes
 from cryoCOFI import get_lib_path
 
 def hough_transform_for_radius(edge_image, radius):
-
+    '''
+    Hough transform for the fixed radius.
+    Args:
+        edge_image: edge image
+        radius: radius (pixels)
+    Returns:
+        best_a: center x
+        best_b: center y
+        accumulator: accumulator
+    '''
     edge_image = edge_image.astype(np.uint8)
     rows, cols = edge_image.shape
 

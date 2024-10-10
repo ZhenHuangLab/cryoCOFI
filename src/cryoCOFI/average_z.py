@@ -3,7 +3,18 @@ import matplotlib.pyplot as plt
 import mrcfile
 import argparse
 
-def average_along_z(tg_path, start=0, end=None):
+def average_along_z(tg_path, 
+                    start=0, 
+                    end=None):
+    '''
+    Average the 2D images along z-axis.
+    Args:
+        tg_path: path to the mrc file
+        start: start index
+        end: end index
+    Returns:
+        average: average of the 2D images
+    '''
     with mrcfile.open(tg_path) as mrc:
         data = mrc.data
     data = cp.array(data)

@@ -9,11 +9,28 @@ from .low_pass_filter import low_pass_filter_gaussian
 import ctypes
 
 def read_pixel_size(mrc_path):
+    '''
+    Read the pixel size from the mrc file.
+    Args:
+        mrc_path: path to the mrc file
+    Returns:
+        pixel_size: pixel size
+    '''
     with mrcfile.open(mrc_path) as mrc:
         pixel_size = mrc.voxel_size.x
     return pixel_size
 
 def bilateral_filter(input_image, kernel_radius, sigma_color, sigma_space):
+    '''
+    Bilateral filter for the image.
+    Args:
+        input_image: input image
+        kernel_radius: kernel radius
+        sigma_color: sigma color
+        sigma_space: sigma space
+    Returns:
+        output_image: output image
+    '''
     height, width = input_image.shape
     input_image = input_image.astype(np.float32)
 
@@ -48,7 +65,14 @@ def bilateral_filter(input_image, kernel_radius, sigma_color, sigma_space):
     return output_image
 
 def gaussian_filter(input_image, kernel_size):
-
+    '''
+    Gaussian filter for the image.
+    Args:
+        input_image: input image
+        kernel_size: kernel size
+    Returns:
+        output_image: output image
+    '''
     input_image = input_image.astype(np.float32)
     height, width = input_image.shape
 
@@ -80,6 +104,13 @@ def gaussian_filter(input_image, kernel_size):
     return output_image
 
 def edge_detector(image):
+    '''
+    Edge detector for the image.
+    Args:
+        image: input image
+    Returns:
+        edge_map: edge map
+    '''
     image = image.astype(np.float32)
     height, width = image.shape
 

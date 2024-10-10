@@ -28,7 +28,8 @@ def main():
     readmrc_parser.add_argument('--sigma_color', '-sc', type=float, default=10.0, help='Sigma color for bilateral filter')
     readmrc_parser.add_argument('--sigma_space', '-ss', type=float, default=10.0, help='Sigma space for bilateral filter')
     readmrc_parser.add_argument('--diameter', '-d', type=int, default=12000, help='Carbon Hole Diameter in Angstrom')
-    readmrc_parser.add_argument('--edge', '-e', type=int, default=20, help='Removing edge pixels and cropping the image')
+    readmrc_parser.add_argument('--map_cropping', '-mc', type=int, default=20, help='Removing edge pixels and cropping the image')
+    readmrc_parser.add_argument('--dist_thr_inside_edge', '-dte', type=int, default=20, help='Distance threshold for inside edge pixels')
     readmrc_parser.add_argument('--mode_threshold', '-mt', type=float, default=0, help='Mode threshold for finding the carbon film edge')
     readmrc_parser.add_argument('--edge_quotient_threshold', '-eqt', type=float, default=6, help='Edge quotient threshold for finding the carbon film edge')
     readmrc_parser.add_argument('--show_fig', '-sf', action='store_true', default=False, help='Show figures if specified')
@@ -37,13 +38,14 @@ def main():
     readdynamo_parser = subparsers.add_parser('readdynamo', help='Read Dynamo doc and tbl file and output a new tbl file without particles inside the carbon film')
     readdynamo_parser.add_argument('--doc_path', '-doc', type=str, required=True, help='Input Dynamo .doc file')
     readdynamo_parser.add_argument('--tbl_path', '-tbl', type=str, required=True, help='Input Dynamo .tbl file')
-    readdynamo_parser.add_argument('--out_path', '-out', type=str, required=True, help='Output Dynamo .tbl file')
+    readdynamo_parser.add_argument('--out_path', '-o', type=str, required=True, help='Output Dynamo .tbl file')
     readdynamo_parser.add_argument('--low_pass', '-lp', type=int, default=200, help='Low pass filter cutoff angstrom')
     readdynamo_parser.add_argument('--kernel_radius', '-kr', type=int, default=5, help='Kernel radius for bilateral filter')
     readdynamo_parser.add_argument('--sigma_color', '-sc', type=float, default=10.0, help='Sigma color for bilateral filter')
     readdynamo_parser.add_argument('--sigma_space', '-ss', type=float, default=10.0, help='Sigma space for bilateral filter')
     readdynamo_parser.add_argument('--diameter', '-d', type=int, default=12000, help='Carbon Hole Diameter in Angstrom')
-    readdynamo_parser.add_argument('--edge', '-e', type=int, default=20, help='Removing edge pixels and cropping the image')
+    readdynamo_parser.add_argument('--map_cropping', '-mc', type=int, default=20, help='Removing edge pixels and cropping the image')
+    readdynamo_parser.add_argument('--dist_thr_inside_edge', '-dte', type=int, default=20, help='Distance threshold for inside edge pixels')
     readdynamo_parser.add_argument('--mode_threshold', '-mt', type=float, default=0, help='Mode threshold for finding the carbon film edge')
     readdynamo_parser.add_argument('--edge_quotient_threshold', '-eqt', type=float, default=6, help='Edge quotient threshold for finding the carbon film edge')
     readdynamo_parser.add_argument('--verbose', '-v', action='store_true', default=False, help='Show verbose information if specified')
@@ -58,7 +60,8 @@ def main():
             args.sigma_color,
             args.sigma_space,
             args.diameter,
-            args.edge,
+            args.map_cropping,
+            args.dist_thr_inside_edge,
             args.mode_threshold,
             args.edge_quotient_threshold,
             args.show_fig,
@@ -76,7 +79,8 @@ def main():
             args.sigma_color,
             args.sigma_space,
             args.diameter,
-            args.edge,
+            args.map_cropping,
+            args.dist_thr_inside_edge,
             args.mode_threshold,
             args.edge_quotient_threshold,
             args.verbose
