@@ -4,7 +4,7 @@ from cryoCOFI import get_lib_path
 
 def find_highest_density(img, mask, inside_flags=(1, 4), outside_flags=(0,)):
     '''
-    Find the highest density inside the arc.
+    Find the density of the highest frequency inside the arc.
     Args:
         img: image
         mask: mask

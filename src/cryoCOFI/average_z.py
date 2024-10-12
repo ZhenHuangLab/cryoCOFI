@@ -1,5 +1,4 @@
 import cupy as cp
-import matplotlib.pyplot as plt
 import mrcfile
 import argparse
 
@@ -42,14 +41,3 @@ if __name__ == '__main__':
 
     with mrcfile.new(output, overwrite=True) as mrc:
         mrc.set_data(cp.asnumpy(average))
-
-    # average = low_pass_filter(average, 20, pixel_size)
-    # average = gaussian_filter(average, sigma=1)
-    # Show the average image
-    # plt.subplot(121)
-    # plt.imshow(average.get(), cmap='gray')
-    # plt.axis('off')
-    # plt.subplot(122)
-    # plt.imshow(average_part.get(), cmap='gray')
-    # plt.axis('off')
-    # plt.show()

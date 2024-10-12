@@ -14,7 +14,9 @@ cryoCOFI (CarbOn FIlm detector for cryo-EM images) is a script designed for cryo
 ## Requirements
 
 - Python 3.9+
-- CUDA-compatible GPU, >=12.2
+- CUDA-compatible GPU
+   - CUDA Toolkit 11.1 or later
+   - NVIDIA GPU Driver supporting CUDA 12.2 or later
 - CuPy, >=13.3.0
 - NumPy, >=2.0.2
 - pandas, >=2.2.3

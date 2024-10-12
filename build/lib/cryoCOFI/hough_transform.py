@@ -16,7 +16,6 @@ def hough_transform_for_radius(edge_image, radius):
     edge_image = edge_image.astype(np.uint8)
     rows, cols = edge_image.shape
 
-    # lib = ctypes.CDLL('./lib/weighted_hough_transform.so')
     lib = ctypes.CDLL(get_lib_path('weighted_hough_transform'))
 
     lib.hough_transform_for_radius.argtypes = [

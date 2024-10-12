@@ -1,6 +1,8 @@
 from .carbon_film_detector import *
 from .detector_for_dynamo import multi_mrc_processing_dynamo
 import argparse
+import os
+
 
 def detector_for_relion():
     pass
@@ -34,6 +36,7 @@ def main():
     readmrc_parser.add_argument('--edge_quotient_threshold', '-eqt', type=float, default=6, help='Edge quotient threshold for finding the carbon film edge')
     readmrc_parser.add_argument('--show_fig', '-sf', action='store_true', default=False, help='Show figures if specified')
     readmrc_parser.add_argument('--verbose', '-v', action='store_true', default=False, help='Show verbose information if specified')
+    readmrc_parser.add_argument('--gpu', type=int, default=0, help='GPU device number to use. Default is 0 and start from 0.')
     
     readdynamo_parser = subparsers.add_parser('readdynamo', help='Read Dynamo doc and tbl file and output a new tbl file without particles inside the carbon film')
     readdynamo_parser.add_argument('--doc_path', '-doc', type=str, required=True, help='Input Dynamo .doc file')
@@ -49,8 +52,11 @@ def main():
     readdynamo_parser.add_argument('--mode_threshold', '-mt', type=float, default=0, help='Mode threshold for finding the carbon film edge')
     readdynamo_parser.add_argument('--edge_quotient_threshold', '-eqt', type=float, default=6, help='Edge quotient threshold for finding the carbon film edge')
     readdynamo_parser.add_argument('--verbose', '-v', action='store_true', default=False, help='Show verbose information if specified')
+    readdynamo_parser.add_argument('--gpu', type=int, default=0, help='GPU device number to use. Default is 0 and start from 0.')
 
     args = parser.parse_args()
+
+    os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu)
 
     if args.command == 'readmrc':
         detector_for_mrc(
