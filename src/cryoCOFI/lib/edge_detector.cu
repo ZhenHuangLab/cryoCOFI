@@ -258,7 +258,7 @@ __host__ void edge_detector(const float* input_image, unsigned char* output_edge
     // 计算累积分布函数（CDF）
     int total = width * height;
     int sum = 0;
-    float percentile = 0.985f; // 90%百分位
+    float percentile = 0.985f;
     float highThreshold = 0.0f;
     for (int i = numBins - 1; i >= 0; --i)
     {

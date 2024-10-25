@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='cryoCOFI',
-    version='0.2.1',
+    version='1.0.0',
     packages=find_packages(where='src'),
     package_dir={'': 'src'},
     install_requires=[
@@ -12,7 +12,8 @@ setup(
         'argparse',
         'numpy>=2.0.2',
         'tqdm>=4.66.5',
-        'pandas>=2.2.3'
+        'pandas>=2.2.3',
+        'setproctitle>=1.3.3'
     ],
     package_data={
         'cryoCOFI': ['lib/*.so'],
@@ -29,7 +30,7 @@ setup(
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Operating System :: OS Independent',
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 5 - Production/Stable'
         'Environment :: GPU :: NVIDIA CUDA :: 12 :: 12.2',
     ],
     python_requires='>=3.9',

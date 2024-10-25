@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: cryoCOFI
-Version: 0.2.1
+Version: 1.0.0
 Summary: CarbOn FIlm detector for cryo-EM images
 Home-page: https://github.com/ZhenHuangLab/cryoCOFI
 Author: Zhen Huang
@@ -12,8 +12,7 @@ Keywords: cryo-EM,cryo-ET,carbon film,edge detection,CUDA,CuPy
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: GNU General Public License v3 (GPLv3)
 Classifier: Operating System :: OS Independent
-Classifier: Development Status :: 3 - Alpha
-Classifier: Environment :: GPU :: NVIDIA CUDA :: 12 :: 12.2
+Classifier: Development Status :: 5 - Production/StableEnvironment :: GPU :: NVIDIA CUDA :: 12 :: 12.2
 Requires-Python: >=3.9
 Description-Content-Type: text/markdown
 License-File: LICENSE
@@ -24,6 +23,7 @@ Requires-Dist: argparse
 Requires-Dist: numpy>=2.0.2
 Requires-Dist: tqdm>=4.66.5
 Requires-Dist: pandas>=2.2.3
+Requires-Dist: setproctitle>=1.3.3
 
 # cryoCOFI
 
@@ -35,7 +35,7 @@ cryoCOFI (CarbOn FIlm detector for cryo-EM images) is a script designed for cryo
 
 - Carbon film detection and particle screening in cryo-EM images
 - Improved algorithm for edge detection (Bilateral filter + Canny detector, aka Bicanny)
-- Integration with Dynamo data formats (.doc and .tbl files)
+- Integration with Dynamo (.doc and .tbl files) & cryoSPARC
 - GPU-accelerated image processing using CuPy and CUDA
 
 ## Requirements
@@ -84,6 +84,7 @@ cryoCOFI [command] [options]
 Available commands:
 - `readmrc`: Process a single MRC file
 - `readdynamo`: Process Dynamo .doc and .tbl files
+- `readcs`: 
 
 For detailed usage instructions, run:
 

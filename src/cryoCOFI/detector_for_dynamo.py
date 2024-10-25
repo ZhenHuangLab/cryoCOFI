@@ -90,9 +90,11 @@ def multi_mrc_processing_dynamo(doc_path,
                         tbl_path,
                         out_path,
                         low_pass,
+                        detector_type,
                         kernel_radius,
                         sigma_color,
                         sigma_space,
+                        canny_kernel,
                         diameter,
                         map_cropping,
                         dist_thr_inside_edge,
@@ -106,9 +108,11 @@ def multi_mrc_processing_dynamo(doc_path,
         tbl_path: path to the Dynamo tbl file
         out_path: path to the output file (tbl file)
         low_pass: low pass filter (angstrom)
+        detector_type: type of the detector
         kernel_radius: kernel radius (pixels)
         sigma_color: sigma color
         sigma_space: sigma space
+        canny_kernel: canny kernel size
         diameter: diameter (angstrom)
         map_cropping: map cropping (pixels)
         dist_thr_inside_edge: distance inside edge (pixels)
@@ -125,21 +129,28 @@ def multi_mrc_processing_dynamo(doc_path,
 
     tomogram_indices = read_dynamo_tbl_tomogram_index(df)
 
-    for tomogram_index in tqdm.tqdm(tomogram_indices, desc="Processing tomograms", position=0, dynamic_ncols=True, unit="tg"):
-        df_slice = read_dynamo_tbl_particle_list(df, tomogram_index)
+    # Add inner progress bar
+    inner_pbar = tqdm.tqdm([], desc="Screening particles", 
+                          position=1, dynamic_ncols=True, unit="ptcl", leave=True)
 
-        mrc_path = mrc_index_paths[tomogram_index]
+    try:
+        for tomogram_index in tqdm.tqdm(tomogram_indices, desc="Processing tomograms", 
+                                       position=0, dynamic_ncols=True, unit="tg", leave=True):
+            df_slice = read_dynamo_tbl_particle_list(df, tomogram_index)
+            mrc_path = mrc_index_paths[tomogram_index]
 
-        if not os.path.exists(mrc_path):
-            print(f"Warning: Skip tomogram {tomogram_index} {mrc_path} because not exist.")
-            df_modified = pd.concat([df_modified, df_slice], ignore_index=True)
-            continue
+            if not os.path.exists(mrc_path):
+                print(f"Warning: Skip tomogram {tomogram_index} {mrc_path} because not exist.")
+                df_modified = pd.concat([df_modified, df_slice], ignore_index=True)
+                continue
 
-        mask = detector_for_mrc(mrc_path,
+            mask = detector_for_mrc(mrc_path,
                                 low_pass,
+                                detector_type,
                                 kernel_radius,
                                 sigma_color,
                                 sigma_space,
+                                canny_kernel,
                                 diameter,
                                 map_cropping,
                                 dist_thr_inside_edge,
@@ -147,21 +158,34 @@ def multi_mrc_processing_dynamo(doc_path,
                                 edge_quotient_threshold,
                                 show_fig=False,
                                 verbose=verbose)
-        if mask is False:
-            # if no carbon film detected, add the particles to df_modified directly
-            df_modified = pd.concat([df_modified, df_slice], ignore_index=True)
-            if verbose:
-                print(f"Skip tomogram {tomogram_index} {mrc_path} because no carbon film detected.")
-        else:
-            # if carbon film detected, screening the particles
-            if verbose:
-                print(f"Processing tomogram {tomogram_index} {mrc_path} with carbon film detected.")
-            # screening the particles
-            for _, row in tqdm.tqdm(df_slice.iterrows(), desc="Screening particles", position=1, dynamic_ncols=True, unit="ptcl", leave=False):
-                x = row[23]
-                y = row[24]
-                if mask[int(y), int(x)] == 1:
-                    df_modified = pd.concat([df_modified, pd.DataFrame(row).T], ignore_index=True)
+
+            if mask is False:
+                df_modified = pd.concat([df_modified, df_slice], ignore_index=True)
+                inner_pbar.reset(total=1)
+                inner_pbar.bar_format = "{desc}: NA%|{bar:5} no carbon film detected {bar:5}|NA/NA [{elapsed}<NA, NA ptcls]"
+                inner_pbar.update(0)
+                if verbose:
+                    print(f"Skip tomogram {tomogram_index} {mrc_path} because no carbon film detected.")
+            else:
+                if verbose:
+                    print(f"Processing tomogram {tomogram_index} {mrc_path} with carbon film detected.")
+                inner_pbar.bar_format = None
+                inner_pbar.reset(total=len(df_slice))
+                
+                # screening the particles
+                for _, row in df_slice.iterrows():
+                    inner_pbar.update(1)
+                    x = row[23]
+                    y = row[24]
+                    if mask[int(y), int(x)] == 1:
+                        df_modified = pd.concat([df_modified, pd.DataFrame(row).T], ignore_index=True)
+
+    except KeyboardInterrupt:
+        inner_pbar.bar_format = None
+        inner_pbar.close()
+        raise
+    finally:
+        inner_pbar.close()
 
     # save the modified tbl file
     save_dynamo_tbl(df_modified, out_path)

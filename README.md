@@ -8,7 +8,7 @@ cryoCOFI (CarbOn FIlm detector for cryo-EM images) is a script designed for cryo
 
 - Carbon film detection and particle screening in cryo-EM images
 - Improved algorithm for edge detection (Bilateral filter + Canny detector, aka Bicanny)
-- Integration with Dynamo data formats (.doc and .tbl files)
+- Integration with Dynamo (.doc and .tbl files) & cryoSPARC
 - GPU-accelerated image processing using CuPy and CUDA
 
 ## Requirements
@@ -57,6 +57,7 @@ cryoCOFI [command] [options]
 Available commands:
 - `readmrc`: Process a single MRC file
 - `readdynamo`: Process Dynamo .doc and .tbl files
+- `readcs`: Process cryoSPARC .cs files
 
 For detailed usage instructions, run:
 

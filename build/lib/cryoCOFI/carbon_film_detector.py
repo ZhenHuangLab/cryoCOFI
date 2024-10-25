@@ -1,18 +1,22 @@
 import cupy as cp
 import matplotlib.pyplot as plt
 import mrcfile
+import numpy as np
+from .canny import canny
 from .low_pass_filter import low_pass_filter_gaussian
 from .hough_transform import hough_transform_for_radius
-from .bicanny import *
+from .bicanny import edge_detector, bilateral_filter
 from .average_z import average_along_z
 from ._utils import read_pixel_size, flag_masking
 from .find_highest_density import find_highest_density
 
 def detector_for_mrc(tg_path,
             low_pass,
+            detector_type,
             kernel_radius,
             sigma_color,
             sigma_space,
+            canny_kernel,
             diameter,
             map_cropping,
             dist_thr_inside_edge,
@@ -26,9 +30,11 @@ def detector_for_mrc(tg_path,
     Args:
         tg_path: path to the mrc file
         low_pass: low pass filter (angstrom)
+        detector_type: type of the detector. bicanny or canny.
         kernel_radius: kernel radius for bilateral filter
         sigma_color: sigma color for bilateral filter
         sigma_space: sigma space for bilateral filter
+        canny_kernel: canny detector kernel size
         diameter: diameter of the carbon film (angstrom)
         map_cropping: size of the map cropping (pixels)
         dist_thr_inside_edge: distance threshold inside edge (pixels)
@@ -55,10 +61,17 @@ def detector_for_mrc(tg_path,
     # low pass filter
     lp_filtered_img = low_pass_filter_gaussian(average, low_pass, pixel_size)
 
-    # bilateral filter
-    lp_bi_img = bilateral_filter(lp_filtered_img, kernel_radius, sigma_color, sigma_space)
-    # edge detector
-    lp_filtered_img_edge = edge_detector(lp_bi_img)
+    if detector_type == 'bicanny':
+        # bilateral filter
+        lp_bi_img = bilateral_filter(lp_filtered_img, kernel_radius, sigma_color, sigma_space)
+        lp_filtered_img_edge = edge_detector(lp_bi_img)
+    elif detector_type == 'canny':
+        # Normalize the image
+        lp_filtered_img_normalized = (lp_filtered_img - lp_filtered_img.min()) / (lp_filtered_img.max() - lp_filtered_img.min())
+        lp_filtered_img_edge = canny(lp_filtered_img_normalized, canny_kernel, threshold=0.4)
+        lp_filtered_img_edge = lp_filtered_img_edge.astype(np.float32)
+    else:
+        raise ValueError(f"Detector type {detector_type} not supported!")
 
     # calculate the radius
     radius = int((diameter / 2) / pixel_size)
