@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: cryoCOFI
-Version: 1.0.0
+Version: 1.0.1
 Summary: CarbOn FIlm detector for cryo-EM images
 Home-page: https://github.com/ZhenHuangLab/cryoCOFI
 Author: Zhen Huang
@@ -12,7 +12,8 @@ Keywords: cryo-EM,cryo-ET,carbon film,edge detection,CUDA,CuPy
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: GNU General Public License v3 (GPLv3)
 Classifier: Operating System :: OS Independent
-Classifier: Development Status :: 5 - Production/StableEnvironment :: GPU :: NVIDIA CUDA :: 12 :: 12.2
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: GPU :: NVIDIA CUDA :: 12 :: 12.2
 Requires-Python: >=3.9
 Description-Content-Type: text/markdown
 License-File: LICENSE

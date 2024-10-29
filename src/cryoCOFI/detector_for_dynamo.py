@@ -30,16 +30,7 @@ def read_dynamo_tbl(tbl_path):
     Returns:
         df: DataFrame
     '''
-    # Define column dtypes
-    # Set all columns to int by default
-    dtypes = {i: int for i in range(40)}  
-    # Columns to be set as float
-    float_columns = [6, 7, 8, 23, 24, 25]  
-    for col in float_columns:
-        dtypes[col] = float
-
-    # Read the file with specified dtypes
-    df = pd.read_csv(tbl_path, sep=' ', header=None, dtype=dtypes)
+    df = pd.read_csv(tbl_path, sep=' ', header=None)
     return df
 
 def save_dynamo_tbl(df, out_path):
