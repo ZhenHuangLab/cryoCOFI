@@ -28,22 +28,28 @@ def read_dynamo_tbl(tbl_path):
     Args:
         tbl_path: path to the Dynamo tbl file
     Returns:
-        df: DataFrame
+        df: DataFrame, original_dtypes: Series
     '''
-    # Read the file and let pandas infer the dtypes
+    # Read the first row to determine original dtypes
+    first_row = pd.read_csv(tbl_path, sep=' ', header=None, nrows=1)
+    original_dtypes = first_row.dtypes
+    
+    # Read the entire file
     df = pd.read_csv(tbl_path, sep=' ', header=None)
-    return df
+    return df, original_dtypes
 
-def save_dynamo_tbl(df, out_path):
+def save_dynamo_tbl(df, out_path, original_dtypes):
     '''
     Save the Dynamo tbl file.
     Args:
         df: DataFrame
         out_path: path to the output file (tbl file)
+        original_dtypes: Series, original data types from first row
     '''
-    # Convert int columns to int (in case they were changed to float during processing)
-    int_columns = [col for col in df.columns if col not in [6, 7, 8, 23, 24, 25]]
-    df[int_columns] = df[int_columns].astype(int)
+    if original_dtypes is not None:
+        # Restore original data types
+        for col in df.columns:
+            df[col] = df[col].astype(original_dtypes[col])
 
     # Save the DataFrame without index and header
     df.to_csv(out_path, sep=' ', header=None, index=None, float_format='%.5f')
@@ -114,7 +120,7 @@ def multi_mrc_processing_dynamo(doc_path,
     '''
     mrc_index_paths = read_dynamo_doc(doc_path)
 
-    df = read_dynamo_tbl(tbl_path)
+    df, original_dtypes = read_dynamo_tbl(tbl_path)
 
     # Create df_modified with the same dtypes as df
     df_modified = pd.DataFrame(columns=df.columns).astype(df.dtypes)
@@ -180,5 +186,5 @@ def multi_mrc_processing_dynamo(doc_path,
         inner_pbar.close()
 
     # save the modified tbl file
-    save_dynamo_tbl(df_modified, out_path)
+    save_dynamo_tbl(df_modified, out_path, original_dtypes)
     print(f"New tbl file saved to {out_path}.")
