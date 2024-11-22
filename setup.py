@@ -1,8 +1,9 @@
 from setuptools import setup, find_packages
+import cryoCOFI
 
 setup(
     name='cryoCOFI',
-    version='1.0.2',
+    version=cryoCOFI.__version__,
     packages=find_packages(where='src'),
     package_dir={'': 'src'},
     install_requires=[
@@ -13,7 +14,9 @@ setup(
         'numpy>=2.0.2',
         'tqdm>=4.66.5',
         'pandas>=2.2.3',
-        'setproctitle>=1.3.3'
+        'setproctitle>=1.3.3',
+        'starfile>=0.5.8',
+        'pyarrow>=18.0.0',
     ],
     package_data={
         'cryoCOFI': ['lib/*.so'],

@@ -70,6 +70,8 @@ def detector_for_mrc(tg_path,
         lp_filtered_img_normalized = (lp_filtered_img - lp_filtered_img.min()) / (lp_filtered_img.max() - lp_filtered_img.min())
         lp_filtered_img_edge = canny(lp_filtered_img_normalized, canny_kernel, threshold=0.4)
         lp_filtered_img_edge = lp_filtered_img_edge.astype(np.float32)
+        plt.imshow(lp_filtered_img_edge, cmap='gray')
+        plt.show()
     else:
         raise ValueError(f"Detector type {detector_type} not supported!")
 
@@ -161,7 +163,8 @@ def show_figure(tg_path, hough_img, lp_filtered_img_edge, lp_filtered_img, mask,
     axs[2].plot(y[valid_indices], x[valid_indices], 'r-')
     axs[2].set_title('Detection Result')
 
-    axs[3].imshow(mask.get(), cmap='gray')
+    axs[3].imshow(lp_filtered_img, cmap='gray', alpha=0.5)
+    axs[3].imshow(mask.get(), cmap='gray', alpha=0.5)
     axs[3].set_title('Mask')
 
     plt.tight_layout()

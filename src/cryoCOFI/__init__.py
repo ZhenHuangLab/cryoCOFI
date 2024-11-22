@@ -1,5 +1,7 @@
 import os
 
+__version__ = '1.0.3'
+
 def get_lib_path(lib_name):
     '''
     Get the path to the library.

@@ -10,6 +10,7 @@ src/cryoCOFI/canny.py
 src/cryoCOFI/carbon_film_detector.py
 src/cryoCOFI/detector_for_cryosparc.py
 src/cryoCOFI/detector_for_dynamo.py
+src/cryoCOFI/detector_for_relion.py
 src/cryoCOFI/find_highest_density.py
 src/cryoCOFI/hough_transform.py
 src/cryoCOFI/low_pass_filter.py

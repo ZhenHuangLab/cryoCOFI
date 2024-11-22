@@ -6,3 +6,5 @@ numpy>=2.0.2
 tqdm>=4.66.5
 pandas>=2.2.3
 setproctitle>=1.3.3
+starfile>=0.5.8
+pyarrow>=18.0.0
